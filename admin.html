@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>연화당 사주 관리자</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#f4efe4;color:#173f42;font-family:Arial,"Noto Sans KR",sans-serif}.wrap{max-width:900px;margin:40px auto;padding:0 18px}.card{background:#fffaf0;border:1px solid rgba(23,63,66,.18);border-radius:18px;padding:24px;box-shadow:0 12px 35px rgba(0,0,0,.08)}h1{margin-top:0}.login{max-width:420px;margin:100px auto}.row{display:grid;grid-template-columns:190px 1fr;gap:12px;align-items:start;padding:10px 0;border-bottom:1px dashed #d8d0c4}.row:last-child{border-bottom:0}label{font-weight:700;font-size:13px;padding-top:11px}input,textarea{width:100%;border:1px solid #c7bfb3;border-radius:10px;padding:11px 12px;font-size:14px;background:white;color:#173f42}textarea{min-height:84px;resize:vertical}button,.linkbtn{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;background:#173f42;color:#fff;text-decoration:none;display:inline-block}.secondary{background:#8b7b68}.danger{background:#a84d43}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.msg{margin-top:12px;font-size:13px}.hidden{display:none}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px}.note{font-size:12px;line-height:1.6;opacity:.7}@media(max-width:650px){.row{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="loginBox" class="card login">
+    <h1>관리자 로그인</h1>
+    <p>홈페이지 문구를 수정하려면 비밀번호를 입력하세요.</p>
+    <input id="password" type="password" placeholder="비밀번호" inputmode="numeric">
+    <div class="actions"><button id="loginBtn">로그인</button><a class="linkbtn secondary" href="index.html">홈으로</a></div>
+    <div id="loginMsg" class="msg"></div>
+  </section>
+
+  <section id="editorBox" class="card hidden">
+    <div class="top"><div><h1 style="margin-bottom:6px">홈페이지 문구 관리</h1><div class="note">저장한 내용은 이 브라우저의 localStorage에 보관되고 index.html에 즉시 반영됩니다.</div></div><a class="linkbtn secondary" href="index.html" target="_blank">홈페이지 보기</a></div>
+    <div id="fields"></div>
+    <div class="actions"><button id="saveBtn">저장</button><button id="resetBtn" class="danger">기본값으로 초기화</button><button id="logoutBtn" class="secondary">로그아웃</button></div>
+    <div id="saveMsg" class="msg"></div>
+    <p class="note">※ 비밀번호 1234는 HTML/자바스크립트에 포함된 클라이언트 측 비밀번호라 실제 운영용 보안에는 적합하지 않습니다. 외부 공개 사이트라면 서버 로그인/인증을 붙여야 합니다.</p>
+  </section>
+</div>
+<script>
+const PASSWORD='1234';
+const defaults={
+siteTitle:'연화당 사주',siteSubtitle:'생년월일로 만나는 나의 사주 이야기',inputTitle:'사주 정보 입력',inputDescription:'정확한 사주팔자를 보려면 출생시간까지 입력하는 것을 권장합니다.',calendarLabel:'달력 구분',solarLabel:'양력',lunarLabel:'음력',nameLabel:'이름',birthLabel:'생년월일',timeLabel:'출생시간',amLabel:'오전',pmLabel:'오후',timeHint:"오전/오후와 1시~12시를 선택하고, 분은 숫자 최대 2자리(00~59)까지 입력하세요. 모르면 '시간 모름'을 선택할 수 있습니다.",genderLabel:'성별',submitButton:'내 사주 보기',todayTitle:'오늘의 사주',elementsTitle:'오행 분포',elementsSubtitle:'목·화·토·금·수',dayMasterTitle:'일간',dayMasterSubtitle:'나를 나타내는 기운',tenGodsTitle:'십성',tenGodsSubtitle:'10가지 관계 기운',strengthTitle:'신강 / 신약',strengthSubtitle:'일간의 강약',usefulGodTitle:'용신 / 희신',usefulGodSubtitle:'보완하면 좋은 기운',relationsTitle:'합·충·형·파·해',relationsSubtitle:'지지 관계',shinsalTitle:'나에게 해당하는 신살·귀인',shinsalSubtitle:'원국에서 성립하는 항목만 표시',decadeTitle:'대운',decadeSubtitle:'10년 단위 흐름',yearLuckTitle:'세운',yearLuckSubtitle:'연도별 흐름',readingTitle:'종합 풀이',readingSubtitle:'성격·직업·재물·연애·건강',disclaimer:'현재 버전은 사이트 UI와 결과 구조를 확인하기 위한 데모입니다. 오늘의 운세와 신살·귀인은 입력한 원국을 기준으로 규칙표를 적용해 표시하지만, 음력·윤달 변환, 절기 기준 월주, 정확한 일주·시주, 지장간·대운 시작 시점 등은 전문 만세력 로직 또는 검증된 API를 연결해야 실제 서비스 수준의 정확도를 확보할 수 있습니다. 신살 판정법은 학파에 따라 일부 차이가 있습니다.'
+};
+const labels={siteTitle:'사이트 제목',siteSubtitle:'메인 부제',inputTitle:'입력 영역 제목',inputDescription:'입력 영역 설명',calendarLabel:'달력 구분 라벨',solarLabel:'양력 버튼',lunarLabel:'음력 버튼',nameLabel:'이름 라벨',birthLabel:'생년월일 라벨',timeLabel:'출생시간 라벨',amLabel:'오전 버튼',pmLabel:'오후 버튼',timeHint:'출생시간 안내문',genderLabel:'성별 라벨',submitButton:'조회 버튼',todayTitle:'오늘의 사주 제목',elementsTitle:'오행 분포 제목',elementsSubtitle:'오행 분포 보조문구',dayMasterTitle:'일간 제목',dayMasterSubtitle:'일간 보조문구',tenGodsTitle:'십성 제목',tenGodsSubtitle:'십성 보조문구',strengthTitle:'신강/신약 제목',strengthSubtitle:'신강/신약 보조문구',usefulGodTitle:'용신/희신 제목',usefulGodSubtitle:'용신/희신 보조문구',relationsTitle:'합충형파해 제목',relationsSubtitle:'합충형파해 보조문구',shinsalTitle:'신살·귀인 제목',shinsalSubtitle:'신살·귀인 보조문구',decadeTitle:'대운 제목',decadeSubtitle:'대운 보조문구',yearLuckTitle:'세운 제목',yearLuckSubtitle:'세운 보조문구',readingTitle:'종합 풀이 제목',readingSubtitle:'종합 풀이 보조문구',disclaimer:'하단 안내문'};
+function getSaved(){try{return JSON.parse(localStorage.getItem('sajuAdminTexts')||'{}')}catch(e){return {}}}
+function render(){const vals={...defaults,...getSaved()};const root=document.getElementById('fields');root.innerHTML='';Object.keys(defaults).forEach(k=>{const row=document.createElement('div');row.className='row';const lab=document.createElement('label');lab.textContent=labels[k]||k;lab.htmlFor='f_'+k;let input;if((vals[k]||'').length>55 || k==='disclaimer' || k==='timeHint' || k==='inputDescription'){input=document.createElement('textarea')}else{input=document.createElement('input');input.type='text'}input.id='f_'+k;input.dataset.key=k;input.value=vals[k]??'';row.append(lab,input);root.appendChild(row)})}
+function showEditor(){document.getElementById('loginBox').classList.add('hidden');document.getElementById('editorBox').classList.remove('hidden');sessionStorage.setItem('sajuAdminAuth','1');render()}
+document.getElementById('loginBtn').onclick=()=>{if(document.getElementById('password').value===PASSWORD){showEditor()}else{document.getElementById('loginMsg').textContent='비밀번호가 올바르지 않습니다.'}};
+document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('loginBtn').click()});
+document.getElementById('saveBtn').onclick=()=>{const data={};document.querySelectorAll('[data-key]').forEach(el=>data[el.dataset.key]=el.value);localStorage.setItem('sajuAdminTexts',JSON.stringify(data));document.getElementById('saveMsg').textContent='저장했습니다. 홈페이지를 새로고침하면 반영됩니다.'};
+document.getElementById('resetBtn').onclick=()=>{if(confirm('모든 문구를 기본값으로 되돌릴까요?')){localStorage.removeItem('sajuAdminTexts');render();document.getElementById('saveMsg').textContent='기본값으로 초기화했습니다.'}};
+document.getElementById('logoutBtn').onclick=()=>{sessionStorage.removeItem('sajuAdminAuth');location.reload()};
+if(sessionStorage.getItem('sajuAdminAuth')==='1')showEditor();
+</script>
+</body>
+</html>
