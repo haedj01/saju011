@@ -1,14 +1,8 @@
 
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-<!-- This site is hosted on Netlify. Anyone can build and deploy a site
-     like this one for free: https://netlify.new/?utm_campaign=ai-legible&utm_source=comment&utm_medium=referral&utm_id=bb32cbf5-4538-4451-8f56-dc0925442c96
-     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
-<meta name="hosting-provider" content="Netlify">
-<meta name="netlify-deploy" content="https://netlify.new/?utm_campaign=ai-legible&amp;utm_source=meta&amp;utm_medium=referral&amp;utm_id=bb32cbf5-4538-4451-8f56-dc0925442c96">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>연화당 사주</title>
   <style>
@@ -360,7 +354,18 @@
       document.querySelectorAll('[data-text-key]').forEach(el=>{ const key=el.dataset.textKey; if(texts[key] != null) el.textContent=texts[key]; });
       document.title = (texts.siteTitle || '연화당 사주');
     }
+    function applyBackgroundImage(){
+      let url=''; try{ url=localStorage.getItem('sajuBackgroundImageUrl')||''; }catch(e){}
+      if(url){
+        document.body.style.backgroundImage = `linear-gradient(rgba(250,246,235,.30), rgba(250,246,235,.30)), url('${url}')`;
+      }
+    }
+    // admin.html에서 저장한 문구/이미지는 우선 로컬(localStorage)에 즉시 반영되고,
+    // 아래쪽 Firebase 동기화 스크립트가 성공하면 다른 기기에서 저장한 최신 내용으로 다시 갱신됩니다.
+    window.__sajuApplyAdminTexts = applyAdminTexts;
+    window.__sajuApplyBackgroundImage = applyBackgroundImage;
     applyAdminTexts();
+    applyBackgroundImage();
 
     const stems = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
     const branches = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
@@ -660,6 +665,42 @@
       result.style.display='block';
       result.scrollIntoView({behavior:'smooth',block:'start'});
     });
+  </script>
+
+  <script type="module">
+    // Firebase 동기화: 실패해도 위쪽 로컬/기본값 로직이 이미 동작 중이므로 화면은 정상적으로 표시됩니다.
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZzeuVZ705Y9U3AABIZX9Ej60VTRotgjw",
+      authDomain: "sajuh-c2636.firebaseapp.com",
+      projectId: "sajuh-c2636",
+      storageBucket: "sajuh-c2636.firebasestorage.app",
+      messagingSenderId: "895332103926",
+      appId: "1:895332103926:web:41783de40b52bff39a1ed7",
+      measurementId: "G-VT3TRQSR5V"
+    };
+
+    (async () => {
+      try {
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const snap = await getDoc(doc(db, 'siteContent', 'main'));
+        if (snap.exists()) {
+          const remote = snap.data();
+          const { backgroundImageUrl, ...remoteText } = remote;
+          let local = {}; try { local = JSON.parse(localStorage.getItem('sajuAdminTexts') || '{}'); } catch (e) {}
+          const merged = { ...local, ...remoteText };
+          try { localStorage.setItem('sajuAdminTexts', JSON.stringify(merged)); } catch (e) {}
+          if (backgroundImageUrl) { try { localStorage.setItem('sajuBackgroundImageUrl', backgroundImageUrl); } catch (e) {} }
+          window.__sajuApplyAdminTexts && window.__sajuApplyAdminTexts();
+          window.__sajuApplyBackgroundImage && window.__sajuApplyBackgroundImage();
+        }
+      } catch (e) {
+        console.warn('Firebase 콘텐츠를 불러오지 못했습니다. 로컬/기본값으로 표시합니다.', e);
+      }
+    })();
   </script>
 </body>
 </html>
