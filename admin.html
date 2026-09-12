@@ -1,676 +1,192 @@
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>연화당 사주</title>
-  <style>
-    * { box-sizing: border-box; }
-    :root {
-      --ink: #173f42;
-      --ink2: #2b5654;
-      --paper: rgba(255, 250, 238, .92);
-      --line: rgba(23, 63, 66, .22);
-      --accent: #c95f4c;
-      --accent2: #e6b98b;
-    }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Noto Serif KR", "Nanum Myeongjo", Georgia, serif;
-      color: var(--ink);
-      background:
-        linear-gradient(rgba(250,246,235,.30), rgba(250,246,235,.30)),
-        url('./saju-bg.png') center/cover fixed no-repeat;
-    }
-    .overlay {
-      min-height: 100vh;
-      padding: 42px 18px 70px;
-      background: linear-gradient(to bottom, rgba(255,255,255,.05), rgba(255,249,235,.16));
-    }
-    .wrap { max-width: 1120px; margin: 0 auto; }
-    .admin-footer { margin-top:28px; text-align:center; }
-    .admin-mode-btn { display:inline-block; padding:10px 16px; border:1px solid rgba(23,63,66,.28); border-radius:999px; background:rgba(255,250,238,.78); color:var(--ink); text-decoration:none; font-size:12px; font-weight:700; letter-spacing:.04em; box-shadow:0 6px 18px rgba(23,63,66,.10); transition:transform .15s ease, background .15s ease; }
-    .admin-mode-btn:hover { transform:translateY(-1px); background:rgba(255,255,255,.95); }
-    .hero {
-      text-align: center;
-      margin-bottom: 28px;
-      text-shadow: 0 1px 0 rgba(255,255,255,.8);
-    }
-    .hero .seal {
-      width: 58px; height: 58px; margin: 0 auto 12px;
-      display:grid; place-items:center;
-      color: #fff; background: var(--accent);
-      border-radius: 8px; transform: rotate(-3deg);
-      border: 2px solid rgba(255,255,255,.75);
-      box-shadow: 0 7px 16px rgba(62, 44, 31, .15);
-      font-size: 24px; font-weight: 700;
-    }
-    h1 { margin: 0; font-size: clamp(34px, 5vw, 58px); letter-spacing: .08em; }
-    .subtitle { margin-top: 9px; font-size: 15px; letter-spacing: .08em; opacity: .78; }
-
-    .card {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: 0 18px 55px rgba(28, 47, 43, .20);
-      backdrop-filter: blur(6px);
-      overflow: hidden;
-    }
-    .card-head {
-      padding: 22px 26px 16px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,.24);
-    }
-    .card-head h2 { margin: 0; font-size: 22px; }
-    .card-head p { margin: 7px 0 0; font-size: 13px; opacity: .72; }
-
-    form { padding: 24px 26px 28px; }
-    .grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    .field { display:flex; flex-direction:column; gap: 7px; }
-    .field.full { grid-column: 1 / -1; }
-    label { font-size: 13px; font-weight: 700; }
-    input, select {
-      width: 100%; padding: 13px 14px;
-      border: 1px solid rgba(23,63,66,.25);
-      border-radius: 12px;
-      background: rgba(255,255,255,.86);
-      color: var(--ink);
-      outline: none;
-      font-size: 15px;
-    }
-    input:focus, select:focus { border-color: var(--ink2); box-shadow: 0 0 0 3px rgba(43,86,84,.10); }
-    .calendar-choice { display:flex; gap: 10px; }
-    .radio {
-      flex:1; position:relative;
-    }
-    .radio input { position:absolute; opacity:0; pointer-events:none; }
-    .radio span {
-      display:block; text-align:center; padding: 13px 10px;
-      border:1px solid rgba(23,63,66,.25);
-      border-radius:12px; background:rgba(255,255,255,.70);
-      cursor:pointer; font-weight:700;
-    }
-    .radio input:checked + span { background: var(--ink); color:white; border-color:var(--ink); }
-    .hint { font-size: 12px; opacity:.64; }
-    .time-row { display:grid; grid-template-columns: 1fr 1fr .8fr; gap:10px; }
-    .time-minute { min-width:0; }
-    .ampm-choice { display:flex; gap:6px; }
-    .ampm-choice .radio span { padding:13px 8px; }
-    .time-hour { min-width:0; }
-    button {
-      width:100%; margin-top: 20px; padding: 15px;
-      border:none; border-radius: 13px; cursor:pointer;
-      color:#fff; background: linear-gradient(135deg, var(--ink), #2e6662);
-      font-size:16px; font-weight:700; letter-spacing:.08em;
-      box-shadow: 0 10px 24px rgba(23,63,66,.22);
-    }
-    button:hover { transform: translateY(-1px); }
-
-    #result { display:none; margin-top: 24px; }
-    .result-inner { padding: 26px; }
-    .result-title { display:flex; align-items:end; justify-content:space-between; gap:12px; margin-bottom:18px; }
-    .result-title h2 { margin:0; font-size:26px; }
-    .result-title .name { color:var(--accent); }
-    .pillars { display:grid; grid-template-columns: repeat(4,1fr); gap:12px; }
-    .pillar {
-      background: rgba(255,255,255,.72);
-      border:1px solid var(--line); border-radius:15px; padding:16px 10px; text-align:center;
-    }
-    .pillar b { display:block; font-size:13px; margin-bottom:10px; opacity:.65; }
-    .hanja { font-size:30px; line-height:1.2; font-weight:700; }
-    .hangul { font-size:12px; margin-top:8px; opacity:.65; }
-    .analysis { margin-top:16px; display:grid; grid-template-columns: 1.1fr .9fr; gap:14px; }
-    .box { background:rgba(255,255,255,.72); border:1px solid var(--line); border-radius:15px; padding:18px; }
-    .box h3 { margin:0 0 10px; font-size:16px; }
-    .box p { margin:0; line-height:1.75; font-size:14px; }
-    .elements { display:flex; gap:8px; flex-wrap:wrap; }
-    .tag { padding:8px 11px; border-radius:999px; background:#f2eadc; border:1px solid var(--line); font-size:13px; }
-    .notice { margin-top:12px; font-size:12px; opacity:.62; line-height:1.6; }
-
-    .section-stack { margin-top:16px; display:grid; gap:14px; }
-    .section-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:14px; }
-    .wide { grid-column: 1 / -1; }
-    .section-title { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
-    .section-title h3 { margin:0; font-size:17px; }
-    .section-title small { opacity:.58; }
-    .metric { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px dashed var(--line); }
-    .metric:last-child { border-bottom:0; }
-    .metric strong { color:var(--accent); }
-    .bar { height:9px; border-radius:999px; overflow:hidden; background:#eee5d8; margin-top:6px; }
-    .bar > i { display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--ink2),var(--accent2)); }
-    .chips { display:flex; flex-wrap:wrap; gap:8px; }
-    .chip { padding:7px 10px; border-radius:999px; border:1px solid var(--line); background:#fffaf0; font-size:12px; }
-    .chip.good { background:#eef7f2; }
-    .chip.warn { background:#fff0ec; }
-    .fortune-list { display:grid; gap:8px; }
-    .fortune-row { display:grid; grid-template-columns:88px 1fr auto; gap:10px; align-items:center; padding:10px 12px; background:rgba(255,255,255,.58); border:1px solid var(--line); border-radius:12px; font-size:13px; }
-    .fortune-row b { color:var(--accent); }
-    .reading-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:9px; }
-    .reading-card { border:1px solid var(--line); border-radius:13px; padding:12px; background:rgba(255,255,255,.66); }
-    .reading-card b { display:block; margin-bottom:7px; }
-    .reading-card p { margin:0; font-size:12px; line-height:1.65; }
-    .disclaimer { margin-top:16px; padding:12px 14px; border-radius:12px; background:rgba(201,95,76,.08); border:1px solid rgba(201,95,76,.2); font-size:12px; line-height:1.65; }
-    .today-card { background:linear-gradient(135deg, rgba(23,63,66,.94), rgba(46,102,98,.90)); color:#fff; border:none; }
-    .today-card .section-title small { opacity:.78; }
-    .today-head { display:grid; grid-template-columns:140px 1fr; gap:18px; align-items:center; }
-    .today-score { width:126px; height:126px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.28); text-align:center; }
-    .today-score strong { font-size:32px; line-height:1; }
-    .today-score span { display:block; font-size:11px; margin-top:5px; opacity:.8; }
-    .today-summary { font-size:14px; line-height:1.8; margin:0; }
-    .today-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-top:14px; }
-    .today-item { padding:11px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18); border-radius:12px; }
-    .today-item b { display:block; font-size:12px; margin-bottom:5px; }
-    .today-item p { margin:0; font-size:12px; line-height:1.55; opacity:.9; }
-    .element-summary { margin-top:14px; padding:13px; background:#fffaf0; border:1px solid var(--line); border-radius:12px; font-size:13px; line-height:1.75; }
-    .element-detail-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-top:12px; }
-    .element-detail { padding:10px; border:1px solid var(--line); border-radius:11px; background:rgba(255,255,255,.65); text-align:center; }
-    .element-detail b { display:block; font-size:13px; margin-bottom:4px; }
-    .element-detail span { display:block; font-size:11px; opacity:.68; }
-    .shinsal-empty { padding:16px; border:1px dashed var(--line); border-radius:12px; font-size:13px; line-height:1.7; background:rgba(255,255,255,.45); }
-    .shinsal-card { padding:13px 14px; border:1px solid var(--line); border-radius:13px; background:rgba(255,255,255,.68); }
-    .shinsal-card + .shinsal-card { margin-top:8px; }
-    .shinsal-card strong { color:var(--accent); }
-    .shinsal-card small { display:block; margin-top:5px; opacity:.68; line-height:1.55; }
-
-    @media (max-width: 760px) {
-      .overlay { padding-top: 25px; }
-      .grid, .analysis, .section-grid { grid-template-columns: 1fr; }
-      .reading-grid { grid-template-columns: 1fr; }
-      .today-head { grid-template-columns:1fr; }
-      .today-score { width:105px; height:105px; }
-      .today-grid, .element-detail-grid { grid-template-columns:1fr 1fr; }
-      .fortune-row { grid-template-columns:70px 1fr; }
-      .fortune-row span:last-child { grid-column:2; }
-      .pillars { grid-template-columns: repeat(2,1fr); }
-      form, .result-inner { padding: 20px; }
-    }
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>연화당 사주 관리자</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#f4efe4;color:#173f42;font-family:Arial,"Noto Sans KR",sans-serif}.wrap{max-width:900px;margin:40px auto;padding:0 18px}.card{background:#fffaf0;border:1px solid rgba(23,63,66,.18);border-radius:18px;padding:24px;box-shadow:0 12px 35px rgba(0,0,0,.08)}h1{margin-top:0}.login{max-width:420px;margin:100px auto}.row{display:grid;grid-template-columns:190px 1fr;gap:12px;align-items:start;padding:10px 0;border-bottom:1px dashed #d8d0c4}.row:last-child{border-bottom:0}label{font-weight:700;font-size:13px;padding-top:11px}input,textarea{width:100%;border:1px solid #c7bfb3;border-radius:10px;padding:11px 12px;font-size:14px;background:white;color:#173f42}textarea{min-height:84px;resize:vertical}button,.linkbtn{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;background:#173f42;color:#fff;text-decoration:none;display:inline-block}.secondary{background:#8b7b68}.danger{background:#a84d43}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.msg{margin-top:12px;font-size:13px}.hidden{display:none}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px}.note{font-size:12px;line-height:1.6;opacity:.7}.imgpreview{max-width:100%;max-height:220px;border-radius:10px;margin-bottom:10px;border:1px solid #d8d0c4;display:block}.badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;margin-left:8px}.badge.ok{background:#e4f3ea;color:#1f7a4d}.badge.off{background:#f3e4e4;color:#8a2f2f}@media(max-width:650px){.row{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style>
 </head>
 <body>
-  <div class="overlay">
-    <div class="wrap">
-      <header class="hero">
-        <div class="seal">命</div>
-        <h1 data-text-key="siteTitle">연화당 사주</h1>
-        <div class="subtitle" data-text-key="siteSubtitle">생년월일로 만나는 나의 사주 이야기</div>
-      </header>
+<div class="wrap">
+  <section id="loginBox" class="card login">
+    <h1>관리자 로그인</h1>
+    <p>홈페이지 문구를 수정하려면 비밀번호를 입력하세요.</p>
+    <input id="password" type="password" placeholder="비밀번호" inputmode="numeric">
+    <div class="actions"><button id="loginBtn">로그인</button><a class="linkbtn secondary" href="index.html">홈으로</a></div>
+    <div id="loginMsg" class="msg"></div>
+  </section>
 
-      <section class="card">
-        <div class="card-head">
-          <h2 data-text-key="inputTitle">사주 정보 입력</h2>
-          <p data-text-key="inputDescription">정확한 사주팔자를 보려면 출생시간까지 입력하는 것을 권장합니다.</p>
-        </div>
-        <form id="sajuForm">
-          <div class="grid">
-            <div class="field full">
-              <label data-text-key="calendarLabel">달력 구분</label>
-              <div class="calendar-choice">
-                <label class="radio"><input type="radio" name="calendar" value="solar" checked><span data-text-key="solarLabel">양력</span></label>
-                <label class="radio"><input type="radio" name="calendar" value="lunar"><span data-text-key="lunarLabel">음력</span></label>
-              </div>
-            </div>
+  <section id="editorBox" class="card hidden">
+    <div class="top"><div><h1 style="margin-bottom:6px">홈페이지 문구 관리 <span id="fbBadge" class="badge off">Firebase 확인 중</span></h1><div class="note">저장한 내용은 이 브라우저의 localStorage에도 보관되고, 인터넷이 연결되어 있으면 Firebase에도 동기화되어 다른 기기의 홈페이지에도 반영됩니다.</div></div><a class="linkbtn secondary" href="index.html" target="_blank">홈페이지 보기</a></div>
 
-            <div class="field">
-              <label for="name" data-text-key="nameLabel">이름</label>
-              <input id="name" type="text" placeholder="예: 홍길동" required />
-            </div>
-            <div class="field">
-              <label for="birth" data-text-key="birthLabel">생년월일</label>
-              <input id="birth" type="text" inputmode="numeric" maxlength="10" placeholder="YYYY-MM-DD" autocomplete="bday" required />
-            </div>
-            <div class="field">
-              <label for="birthHour" data-text-key="timeLabel">출생시간</label>
-              <div class="time-row">
-                <div class="ampm-choice">
-                  <label class="radio"><input type="radio" name="ampm" value="AM" checked><span data-text-key="amLabel">오전</span></label>
-                  <label class="radio"><input type="radio" name="ampm" value="PM"><span data-text-key="pmLabel">오후</span></label>
-                </div>
-                <select id="birthHour" class="time-hour" aria-label="출생 시각">
-                  <option value="">시간 모름</option>
-                  <option value="1">1시</option><option value="2">2시</option><option value="3">3시</option>
-                  <option value="4">4시</option><option value="5">5시</option><option value="6">6시</option>
-                  <option value="7">7시</option><option value="8">8시</option><option value="9">9시</option>
-                  <option value="10">10시</option><option value="11">11시</option><option value="12">12시</option>
-                </select>
-                <input id="birthMinute" class="time-minute" type="text" inputmode="numeric" maxlength="2" placeholder="분" aria-label="출생 분" />
-              </div>
-              <div class="hint" data-text-key="timeHint">오전/오후와 1시~12시를 선택하고, 분은 숫자 최대 2자리(00~59)까지 입력하세요. 모르면 '시간 모름'을 선택할 수 있습니다.</div>
-            </div>
-            <div class="field">
-              <label for="gender" data-text-key="genderLabel">성별</label>
-              <select id="gender">
-                <option value="female">여성</option>
-                <option value="male">남성</option>
-                <option value="none">선택 안 함</option>
-              </select>
-            </div>
-          </div>
-          <button type="submit" data-text-key="submitButton">내 사주 보기</button>
-        </form>
-      </section>
-
-      <section id="result" class="card">
-        <div class="result-inner">
-          <div class="result-title">
-            <h2><span class="name" id="resultName"></span>님의 사주</h2>
-            <small id="resultMeta"></small>
-          </div>
-
-          <div class="pillars" id="pillars"></div>
-
-          <div class="section-stack">
-            <div class="box wide today-card">
-              <div class="section-title"><h3 data-text-key="todayTitle">오늘의 사주</h3><small id="todayDate"></small></div>
-              <div class="today-head">
-                <div class="today-score"><div><strong id="todayScore">-</strong><span>오늘의 흐름</span></div></div>
-                <div>
-                  <p class="today-summary" id="todaySummary"></p>
-                  <div class="chips" id="todayTags" style="margin-top:10px"></div>
-                </div>
-              </div>
-              <div class="today-grid" id="todayDetails"></div>
-            </div>
-            <div class="section-grid">
-              <div class="box">
-                <div class="section-title"><h3 data-text-key="elementsTitle">오행 분포</h3><small data-text-key="elementsSubtitle">목·화·토·금·수</small></div>
-                <div id="elementBars"></div>
-                <div class="element-detail-grid" id="elementDetails"></div>
-                <div class="element-summary" id="elementSummary"></div>
-              </div>
-              <div class="box">
-                <div class="section-title"><h3 data-text-key="dayMasterTitle">일간</h3><small data-text-key="dayMasterSubtitle">나를 나타내는 기운</small></div>
-                <p id="dayMaster"></p>
-              </div>
-
-              <div class="box">
-                <div class="section-title"><h3 data-text-key="tenGodsTitle">십성</h3><small data-text-key="tenGodsSubtitle">10가지 관계 기운</small></div>
-                <div class="chips" id="tenGods"></div>
-              </div>
-              <div class="box">
-                <div class="section-title"><h3 data-text-key="strengthTitle">신강 / 신약</h3><small data-text-key="strengthSubtitle">일간의 강약</small></div>
-                <p id="strength"></p>
-              </div>
-
-              <div class="box">
-                <div class="section-title"><h3 data-text-key="usefulGodTitle">용신 / 희신</h3><small data-text-key="usefulGodSubtitle">보완하면 좋은 기운</small></div>
-                <p id="usefulGod"></p>
-              </div>
-              <div class="box">
-                <div class="section-title"><h3 data-text-key="relationsTitle">합·충·형·파·해</h3><small data-text-key="relationsSubtitle">지지 관계</small></div>
-                <div class="chips" id="relations"></div>
-              </div>
-
-              <div class="box wide">
-                <div class="section-title"><h3 data-text-key="shinsalTitle">나에게 해당하는 신살·귀인</h3><small data-text-key="shinsalSubtitle">원국에서 성립하는 항목만 표시</small></div>
-                <div id="shinsal"></div>
-              </div>
-
-              <div class="box wide">
-                <div class="section-title"><h3 data-text-key="decadeTitle">대운</h3><small data-text-key="decadeSubtitle">10년 단위 흐름</small></div>
-                <div class="fortune-list" id="decadeLuck"></div>
-              </div>
-
-              <div class="box wide">
-                <div class="section-title"><h3 data-text-key="yearLuckTitle">세운</h3><small data-text-key="yearLuckSubtitle">연도별 흐름</small></div>
-                <div class="fortune-list" id="yearLuck"></div>
-              </div>
-
-              <div class="box wide">
-                <div class="section-title"><h3 data-text-key="readingTitle">종합 풀이</h3><small data-text-key="readingSubtitle">성격·직업·재물·연애·건강</small></div>
-                <div class="reading-grid" id="readings"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="disclaimer" data-text-key="disclaimer">
-            현재 버전은 사이트 UI와 결과 구조를 확인하기 위한 데모입니다. 오늘의 운세와 신살·귀인은 입력한 원국을 기준으로 규칙표를 적용해 표시하지만, 음력·윤달 변환, 절기 기준 월주, 정확한 일주·시주, 지장간·대운 시작 시점 등은 전문 만세력 로직 또는 검증된 API를 연결해야 실제 서비스 수준의 정확도를 확보할 수 있습니다. 신살 판정법은 학파에 따라 일부 차이가 있습니다.
-          </div>
-        </div>
-      </section>
-      <div class="admin-footer">
-        <a class="admin-mode-btn" href="admin.html">관리자 모드</a>
+    <div class="row">
+      <label>배경 이미지</label>
+      <div>
+        <img id="bgPreview" class="imgpreview hidden" alt="배경 이미지 미리보기">
+        <input id="bgFile" type="file" accept="image/*">
+        <div class="actions" style="margin-top:10px"><button id="bgUploadBtn" type="button">이미지 저장</button></div>
+        <div id="bgMsg" class="msg"></div>
+        <p class="note">권장: 5MB 이하 이미지. 저장하면 Firebase Storage에 업로드되고, 홈페이지 배경으로 바로 반영됩니다.</p>
       </div>
     </div>
-  </div>
 
-  <script>
-    const ADMIN_TEXT_DEFAULTS = {
-      siteTitle:'연화당 사주', siteSubtitle:'생년월일로 만나는 나의 사주 이야기', inputTitle:'사주 정보 입력',
-      inputDescription:'정확한 사주팔자를 보려면 출생시간까지 입력하는 것을 권장합니다.', calendarLabel:'달력 구분', solarLabel:'양력', lunarLabel:'음력',
-      nameLabel:'이름', birthLabel:'생년월일', timeLabel:'출생시간', amLabel:'오전', pmLabel:'오후',
-      timeHint:"오전/오후와 1시~12시를 선택하고, 분은 숫자 최대 2자리(00~59)까지 입력하세요. 모르면 '시간 모름'을 선택할 수 있습니다.",
-      genderLabel:'성별', submitButton:'내 사주 보기', todayTitle:'오늘의 사주', elementsTitle:'오행 분포', elementsSubtitle:'목·화·토·금·수',
-      dayMasterTitle:'일간', dayMasterSubtitle:'나를 나타내는 기운', tenGodsTitle:'십성', tenGodsSubtitle:'10가지 관계 기운',
-      strengthTitle:'신강 / 신약', strengthSubtitle:'일간의 강약', usefulGodTitle:'용신 / 희신', usefulGodSubtitle:'보완하면 좋은 기운',
-      relationsTitle:'합·충·형·파·해', relationsSubtitle:'지지 관계', shinsalTitle:'나에게 해당하는 신살·귀인', shinsalSubtitle:'원국에서 성립하는 항목만 표시',
-      decadeTitle:'대운', decadeSubtitle:'10년 단위 흐름', yearLuckTitle:'세운', yearLuckSubtitle:'연도별 흐름', readingTitle:'종합 풀이', readingSubtitle:'성격·직업·재물·연애·건강',
-      disclaimer:'현재 버전은 사이트 UI와 결과 구조를 확인하기 위한 데모입니다. 오늘의 운세와 신살·귀인은 입력한 원국을 기준으로 규칙표를 적용해 표시하지만, 음력·윤달 변환, 절기 기준 월주, 정확한 일주·시주, 지장간·대운 시작 시점 등은 전문 만세력 로직 또는 검증된 API를 연결해야 실제 서비스 수준의 정확도를 확보할 수 있습니다. 신살 판정법은 학파에 따라 일부 차이가 있습니다.'
-    };
-    function applyAdminTexts(){
-      let saved={}; try{ saved=JSON.parse(localStorage.getItem('sajuAdminTexts')||'{}'); }catch(e){}
-      const texts={...ADMIN_TEXT_DEFAULTS,...saved};
-      document.querySelectorAll('[data-text-key]').forEach(el=>{ const key=el.dataset.textKey; if(texts[key] != null) el.textContent=texts[key]; });
-      document.title = (texts.siteTitle || '연화당 사주');
-    }
-    function applyBackgroundImage(){
-      let url=''; try{ url=localStorage.getItem('sajuBackgroundImageUrl')||''; }catch(e){}
-      if(url){
-        document.body.style.backgroundImage = `linear-gradient(rgba(250,246,235,.30), rgba(250,246,235,.30)), url('${url}')`;
-      }
-    }
-    // admin.html에서 저장한 문구/이미지는 우선 로컬(localStorage)에 즉시 반영되고,
-    // 아래쪽 Firebase 동기화 스크립트가 성공하면 다른 기기에서 저장한 최신 내용으로 다시 갱신됩니다.
-    window.__sajuApplyAdminTexts = applyAdminTexts;
-    window.__sajuApplyBackgroundImage = applyBackgroundImage;
-    applyAdminTexts();
-    applyBackgroundImage();
+    <div id="fields"></div>
+    <div class="actions"><button id="saveBtn">저장</button><button id="resetBtn" class="danger">기본값으로 초기화</button><button id="logoutBtn" class="secondary">로그아웃</button></div>
+    <div id="saveMsg" class="msg"></div>
+    <p class="note">※ 비밀번호 1234는 HTML/자바스크립트에 포함된 클라이언트 측 비밀번호라 실제 운영용 보안에는 적합하지 않습니다. 외부에 공개하는 사이트라면 서버 로그인/인증을 붙이는 것을 권장합니다.</p>
+    <p class="note">※ Firebase 동기화는 익명 로그인을 이용합니다. Firebase 콘솔에서 Authentication → 익명 로그인 사용 설정과, Firestore/Storage 보안 규칙(쓰기는 로그인된 사용자만 허용)을 설정해야 저장이 정상 동작합니다.</p>
+  </section>
+</div>
+<script>
+/* ===================== 핵심 UI 로직 (Firebase 없이도 항상 동작) ===================== */
+const PASSWORD='1234';
+const defaults={
+siteTitle:'연화당 사주',siteSubtitle:'생년월일로 만나는 나의 사주 이야기',inputTitle:'사주 정보 입력',inputDescription:'정확한 사주팔자를 보려면 출생시간까지 입력하는 것을 권장합니다.',calendarLabel:'달력 구분',solarLabel:'양력',lunarLabel:'음력',nameLabel:'이름',birthLabel:'생년월일',timeLabel:'출생시간',amLabel:'오전',pmLabel:'오후',timeHint:"오전/오후와 1시~12시를 선택하고, 분은 숫자 최대 2자리(00~59)까지 입력하세요. 모르면 '시간 모름'을 선택할 수 있습니다.",genderLabel:'성별',submitButton:'내 사주 보기',todayTitle:'오늘의 사주',elementsTitle:'오행 분포',elementsSubtitle:'목·화·토·금·수',dayMasterTitle:'일간',dayMasterSubtitle:'나를 나타내는 기운',tenGodsTitle:'십성',tenGodsSubtitle:'10가지 관계 기운',strengthTitle:'신강 / 신약',strengthSubtitle:'일간의 강약',usefulGodTitle:'용신 / 희신',usefulGodSubtitle:'보완하면 좋은 기운',relationsTitle:'합·충·형·파·해',relationsSubtitle:'지지 관계',shinsalTitle:'나에게 해당하는 신살·귀인',shinsalSubtitle:'원국에서 성립하는 항목만 표시',decadeTitle:'대운',decadeSubtitle:'10년 단위 흐름',yearLuckTitle:'세운',yearLuckSubtitle:'연도별 흐름',readingTitle:'종합 풀이',readingSubtitle:'성격·직업·재물·연애·건강',disclaimer:'현재 버전은 사이트 UI와 결과 구조를 확인하기 위한 데모입니다. 오늘의 운세와 신살·귀인은 입력한 원국을 기준으로 규칙표를 적용해 표시하지만, 음력·윤달 변환, 절기 기준 월주, 정확한 일주·시주, 지장간·대운 시작 시점 등은 전문 만세력 로직 또는 검증된 API를 연결해야 실제 서비스 수준의 정확도를 확보할 수 있습니다. 신살 판정법은 학파에 따라 일부 차이가 있습니다.'
+};
+const labels={siteTitle:'사이트 제목',siteSubtitle:'메인 부제',inputTitle:'입력 영역 제목',inputDescription:'입력 영역 설명',calendarLabel:'달력 구분 라벨',solarLabel:'양력 버튼',lunarLabel:'음력 버튼',nameLabel:'이름 라벨',birthLabel:'생년월일 라벨',timeLabel:'출생시간 라벨',amLabel:'오전 버튼',pmLabel:'오후 버튼',timeHint:'출생시간 안내문',genderLabel:'성별 라벨',submitButton:'조회 버튼',todayTitle:'오늘의 사주 제목',elementsTitle:'오행 분포 제목',elementsSubtitle:'오행 분포 보조문구',dayMasterTitle:'일간 제목',dayMasterSubtitle:'일간 보조문구',tenGodsTitle:'십성 제목',tenGodsSubtitle:'십성 보조문구',strengthTitle:'신강/신약 제목',strengthSubtitle:'신강/신약 보조문구',usefulGodTitle:'용신/희신 제목',usefulGodSubtitle:'용신/희신 보조문구',relationsTitle:'합충형파해 제목',relationsSubtitle:'합충형파해 보조문구',shinsalTitle:'신살·귀인 제목',shinsalSubtitle:'신살·귀인 보조문구',decadeTitle:'대운 제목',decadeSubtitle:'대운 보조문구',yearLuckTitle:'세운 제목',yearLuckSubtitle:'세운 보조문구',readingTitle:'종합 풀이 제목',readingSubtitle:'종합 풀이 보조문구',disclaimer:'하단 안내문'};
 
-    const stems = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-    const branches = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-    const stemKor = ['갑','을','병','정','무','기','경','신','임','계'];
-    const branchKor = ['자','축','인','묘','진','사','오','미','신','유','술','해'];
-    const elementMap = { 甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수' };
-    const branchElement = { 子:'수',丑:'토',寅:'목',卯:'목',辰:'토',巳:'화',午:'화',未:'토',申:'금',酉:'금',戌:'토',亥:'수' };
-    const dayMasterText = {
-      甲:'큰 나무처럼 곧게 뻗는 갑목', 乙:'풀과 꽃처럼 유연한 을목', 丙:'태양처럼 밝고 확산하는 병화', 丁:'촛불처럼 섬세한 정화',
-      戊:'큰 산처럼 중심을 잡는 무토', 己:'밭과 흙처럼 품어주는 기토', 庚:'큰 쇠처럼 결단력 있는 경금', 辛:'보석처럼 정교한 신금',
-      壬:'큰 물처럼 유동적인 임수', 癸:'비와 이슬처럼 섬세한 계수'
-    };
+function getSaved(){try{return JSON.parse(localStorage.getItem('sajuAdminTexts')||'{}')}catch(e){return {}}}
+function getSavedImage(){try{return localStorage.getItem('sajuBackgroundImageUrl')||''}catch(e){return ''}}
+function setBadge(state){
+  const b=document.getElementById('fbBadge');
+  if(!b) return;
+  if(state==='ok'){ b.textContent='Firebase 연결됨'; b.className='badge ok'; }
+  else if(state==='off'){ b.textContent='Firebase 연결 안됨(로컬만 사용)'; b.className='badge off'; }
+  else { b.textContent='Firebase 확인 중'; b.className='badge off'; }
+}
 
-    function cyclical(n) {
-      const s = ((n % 10) + 10) % 10;
-      const b = ((n % 12) + 12) % 12;
-      return { hanja: stems[s] + branches[b], kor: stemKor[s] + branchKor[b], stem: stems[s], branch: branches[b] };
-    }
+function render(vals, imageUrl){
+  const merged={...defaults,...vals};
+  const root=document.getElementById('fields');root.innerHTML='';
+  Object.keys(defaults).forEach(k=>{
+    const row=document.createElement('div');row.className='row';
+    const lab=document.createElement('label');lab.textContent=labels[k]||k;lab.htmlFor='f_'+k;
+    let input;
+    if((merged[k]||'').length>55 || k==='disclaimer' || k==='timeHint' || k==='inputDescription'){input=document.createElement('textarea')}else{input=document.createElement('input');input.type='text'}
+    input.id='f_'+k;input.dataset.key=k;input.value=merged[k]??'';
+    row.append(lab,input);root.appendChild(row);
+  });
+  const preview=document.getElementById('bgPreview');
+  const currentImg = imageUrl || getSavedImage();
+  if(currentImg){ preview.src=currentImg; preview.classList.remove('hidden'); } else { preview.classList.add('hidden'); }
+}
 
-    // UI 시연용 간이 계산입니다. 실제 서비스에서는 검증된 만세력 계산식/API로 교체하세요.
-    function simpleSaju(date, time) {
-      const y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate();
-      const hour = time ? parseInt(time.split(':')[0], 10) : 12;
-      const yearP = cyclical(y - 4);
-      const monthP = cyclical((y - 4) * 12 + m + 1);
-      const base = Math.floor(Date.UTC(y, m-1, d) / 86400000);
-      const dayP = cyclical(base + 40);
-      const hourBranch = Math.floor(((hour + 1) % 24) / 2);
-      const hourP = cyclical((base % 10) * 12 + hourBranch);
-      return [yearP, monthP, dayP, hourP];
-    }
+function showEditor(){
+  document.getElementById('loginBox').classList.add('hidden');
+  document.getElementById('editorBox').classList.remove('hidden');
+  sessionStorage.setItem('sajuAdminAuth','1');
+  const local = getSaved();
+  render(local, getSavedImage());
+  trySyncFromFirebase(local);
+}
 
-    function hashSeed(text) {
-      return [...text].reduce((a,c)=>((a*31)+c.charCodeAt(0))>>>0, 2166136261);
-    }
+document.getElementById('loginBtn').onclick=()=>{
+  if(document.getElementById('password').value===PASSWORD){ showEditor(); }
+  else{ document.getElementById('loginMsg').textContent='비밀번호가 올바르지 않습니다.'; }
+};
+document.getElementById('password').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('loginBtn').click(); });
 
-    function renderElements(p) {
-      const counts = {목:0, 화:0, 토:0, 금:0, 수:0};
-      p.forEach(x => { counts[elementMap[x.stem]]++; counts[branchElement[x.branch]]++; });
-      const total = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
-      const max = Math.max(...Object.values(counts), 1);
-      const meanings = {
-        목:'성장·기획·시작', 화:'표현·열정·확산', 토:'안정·조율·현실성', 금:'판단·원칙·결단', 수:'사고·정보·유연성'
-      };
-      document.getElementById('elementBars').innerHTML = Object.entries(counts).map(([k,v]) => `
-        <div class="metric"><div style="flex:1"><span>${k} <small style="opacity:.55">${meanings[k]}</small></span><div class="bar"><i style="width:${(v/max)*100}%"></i></div></div><strong>${v} · ${Math.round(v/total*100)}%</strong></div>`).join('');
-      document.getElementById('elementDetails').innerHTML = Object.entries(counts).map(([k,v])=>`
-        <div class="element-detail"><b>${k} ${v}</b><span>${Math.round(v/total*100)}%</span><span>${meanings[k]}</span></div>`).join('');
+document.getElementById('saveBtn').onclick=async ()=>{
+  const data={};document.querySelectorAll('[data-key]').forEach(el=>data[el.dataset.key]=el.value);
+  try{ localStorage.setItem('sajuAdminTexts', JSON.stringify(data)); }catch(e){}
+  const msgEl=document.getElementById('saveMsg');
+  msgEl.textContent='저장했습니다.';
+  try{
+    const fb = await getFirebase();
+    if(!fb) throw new Error('firebase-unavailable');
+    await fb.ensureAuth();
+    await fb.setDoc(fb.CONTENT_DOC, data, {merge:true});
+    setBadge('ok');
+    msgEl.textContent='저장했습니다. Firebase에도 동기화되어 다른 기기의 홈페이지에도 반영됩니다.';
+  }catch(e){
+    console.warn(e);
+    setBadge('off');
+    msgEl.textContent='이 브라우저에는 저장했습니다. Firebase 동기화는 실패했습니다(인터넷 연결 또는 Firebase 설정을 확인해주세요). 이 화면과 이 브라우저에서는 정상적으로 반영됩니다.';
+  }
+};
 
-      const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-      const strongest = sorted[0], weakest = [...sorted].reverse()[0];
-      const balance = Math.max(0, Math.round(100 - (Math.max(...Object.values(counts))-Math.min(...Object.values(counts))) * 15));
-      const zero = Object.entries(counts).filter(([,v])=>v===0).map(([k])=>k);
-      document.getElementById('elementSummary').innerHTML = `
-        <strong>가장 강한 오행: ${strongest[0]}(${strongest[1]})</strong> · 가장 약한 오행: ${weakest[0]}(${weakest[1]})<br>
-        오행 균형도는 약 <strong>${balance}점</strong>입니다. ${strongest[0]}의 ${meanings[strongest[0]]} 성향이 상대적으로 두드러지고, ${weakest[0]}의 ${meanings[weakest[0]]} 성향은 의식적으로 보완해 보는 방식으로 해석할 수 있습니다.
-        ${zero.length ? `<br><strong>${zero.join('·')}</strong> 기운이 원국 표면에 나타나지 않습니다. '없다=나쁘다'가 아니라 다른 기운과 지장간·운의 흐름까지 함께 봐야 합니다.` : ''}`;
-      return counts;
-    }
+document.getElementById('resetBtn').onclick=async ()=>{
+  if(!confirm('모든 문구를 기본값으로 되돌릴까요?'))return;
+  localStorage.removeItem('sajuAdminTexts');
+  render(defaults, getSavedImage());
+  const msgEl=document.getElementById('saveMsg');
+  msgEl.textContent='기본값으로 초기화했습니다.';
+  try{
+    const fb = await getFirebase();
+    if(!fb) throw new Error('firebase-unavailable');
+    await fb.ensureAuth();
+    await fb.setDoc(fb.CONTENT_DOC, defaults, {merge:true});
+    setBadge('ok');
+    msgEl.textContent+=' (Firebase에도 기본값으로 반영했습니다.)';
+  }catch(e){
+    console.warn(e);
+    setBadge('off');
+    msgEl.textContent+=' Firebase 동기화는 실패했습니다(로컬 초기화는 완료).';
+  }
+};
 
-    function renderTenGods(p) {
-      const ten = ['비견','겁재','식신','상관','편재','정재','편관','정관','편인','정인'];
-      const seed = hashSeed(p.map(x=>x.hanja).join(''));
-      document.getElementById('tenGods').innerHTML = ten.map((x,i)=>`<span class="chip ${((seed>>>(i%16))&1)?'good':''}">${x}</span>`).join('');
-    }
+document.getElementById('logoutBtn').onclick=()=>{ sessionStorage.removeItem('sajuAdminAuth'); location.reload(); };
 
-    function renderRelations(p) {
-      const list = ['천간합','육합','삼합','방합','충','형','파','해'];
-      const seed = hashSeed(p.map(x=>x.branch).join(''));
-      document.getElementById('relations').innerHTML = list.map((x,i)=>`<span class="chip ${((seed+i*7)%3===0)?'warn':''}">${x} · ${(seed+i)%4===0?'작용 있음':'두드러짐 적음'}</span>`).join('');
-    }
+document.getElementById('bgFile').addEventListener('change', e=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{ const p=document.getElementById('bgPreview'); p.src=reader.result; p.classList.remove('hidden'); };
+  reader.readAsDataURL(file);
+});
 
-    function renderShinsal(p) {
-      const dayStem = p[2].stem;
-      const dayBranch = p[2].branch;
-      const yearBranch = p[0].branch;
-      const monthBranch = p[1].branch;
-      const allBranches = p.map(x=>x.branch);
-      const allStems = p.map(x=>x.stem);
-      const dayPillar = p[2].hanja;
-      const found = [];
-      const push = (name, desc, basis) => found.push({name, desc, basis});
+document.getElementById('bgUploadBtn').onclick=async ()=>{
+  const fileInput=document.getElementById('bgFile');
+  const file=fileInput.files[0];
+  const msgEl=document.getElementById('bgMsg');
+  if(!file){ msgEl.textContent='업로드할 이미지를 선택해주세요.'; return; }
+  if(!file.type.startsWith('image/')){ msgEl.textContent='이미지 파일만 업로드할 수 있습니다.'; return; }
+  if(file.size > 5*1024*1024){ msgEl.textContent='이미지 용량은 5MB 이하로 올려주세요.'; return; }
+  msgEl.textContent='업로드 중...';
+  try{
+    const fb = await getFirebase();
+    if(!fb) throw new Error('firebase-unavailable');
+    await fb.ensureAuth();
+    const ext=(file.name.split('.').pop()||'png').toLowerCase();
+    const storageRef=fb.ref(fb.storage, `site/background-${Date.now()}.${ext}`);
+    await fb.uploadBytes(storageRef, file);
+    const url=await fb.getDownloadURL(storageRef);
+    await fb.setDoc(fb.CONTENT_DOC, {backgroundImageUrl:url}, {merge:true});
+    try{ localStorage.setItem('sajuBackgroundImageUrl', url); }catch(e){}
+    document.getElementById('bgPreview').src=url;
+    document.getElementById('bgPreview').classList.remove('hidden');
+    setBadge('ok');
+    msgEl.textContent='배경 이미지를 저장했습니다. 홈페이지를 새로고침하면 반영됩니다.';
+  }catch(e){
+    console.warn(e);
+    setBadge('off');
+    msgEl.textContent='업로드에 실패했습니다. Firebase Storage를 사용하려면 인터넷 연결이 필요하고, 이 페이지를 http(s) 서버로 열어야 합니다(파일 더블클릭으로 열면 동작하지 않을 수 있습니다).';
+  }
+};
 
-      // 12신살 계열은 년지·일지의 삼합국 기준으로 원국의 다른 지지를 대조하는 통상표를 사용합니다.
-      const groupTable = {
-        '申子辰': {겁살:'巳',재살:'午',천살:'未',지살:'申',년살:'酉',월살:'戌',망신살:'亥',장성살:'子',반안살:'丑',역마살:'寅',육해살:'卯',화개살:'辰'},
-        '寅午戌': {겁살:'亥',재살:'子',천살:'丑',지살:'寅',년살:'卯',월살:'辰',망신살:'巳',장성살:'午',반안살:'未',역마살:'申',육해살:'酉',화개살:'戌'},
-        '亥卯未': {겁살:'申',재살:'酉',천살:'戌',지살:'亥',년살:'子',월살:'丑',망신살:'寅',장성살:'卯',반안살:'辰',역마살:'巳',육해살:'午',화개살:'未'},
-        '巳酉丑': {겁살:'寅',재살:'卯',천살:'辰',지살:'巳',년살:'午',월살:'未',망신살:'申',장성살:'酉',반안살:'戌',역마살:'亥',육해살:'子',화개살:'丑'}
-      };
-      function groupOf(b){ return Object.keys(groupTable).find(g=>g.includes(b)); }
-      const checked = new Set();
-      [yearBranch, dayBranch].forEach(base=>{
-        const g=groupOf(base); if(!g) return;
-        Object.entries(groupTable[g]).forEach(([name,target])=>{
-          if(allBranches.includes(target) && !checked.has(name)){
-            checked.add(name);
-            const descMap={
-              겁살:'경쟁·손재·급격한 변화', 재살:'압박·구속·사건의 변수', 천살:'예측하기 어려운 환경 변화', 지살:'이동·활동·환경 변화',
-              년살:'도화 성향·대인관계·주목', 월살:'정체·고립감을 느끼기 쉬운 흐름', 망신살:'노출·구설·체면의 이슈', 장성살:'권위·리더십·성취욕',
-              반안살:'지위·명예·안정 지향', 역마살:'이동·변화·출장·이사·해외', 육해살:'관계의 마찰·방해', 화개살:'예술·철학·종교·몰입·고독'
-            };
-            push(name, descMap[name], `${base} 기준 → 원국에 ${target} 존재`);
-          }
-        });
-      });
+if(sessionStorage.getItem('sajuAdminAuth')==='1') showEditor();
 
-      // 도화살은 년지/일지 삼합국의 도화지를 별도 표시
-      const peach = {'申子辰':'酉','寅午戌':'卯','亥卯未':'子','巳酉丑':'午'};
-      [yearBranch, dayBranch].forEach(base=>{ const g=groupOf(base), t=g&&peach[g]; if(t&&allBranches.includes(t)&&!checked.has('도화살')){checked.add('도화살');push('도화살','매력·인기·이성운·대인관계에서 주목받는 기운',`${base} 기준 도화지 ${t}가 원국에 존재`);} });
+/* ===================== Firebase 연동 (선택 사항, 실패해도 위 UI는 영향 없음) ===================== */
+let firebaseSingleton = null;
+let firebaseSingletonPromise = null;
 
-      const noble = {甲:['丑','未'],戊:['丑','未'],庚:['丑','未'],乙:['子','申'],己:['子','申'],丙:['亥','酉'],丁:['亥','酉'],辛:['午','寅'],壬:['卯','巳'],癸:['卯','巳']};
-      (noble[dayStem]||[]).forEach(t=>{ if(allBranches.includes(t)&&!checked.has('천을귀인')){checked.add('천을귀인');push('천을귀인','도움을 주는 사람·위기에서의 지원·귀인운',`${dayStem}일간의 천을귀인 ${t}가 원국에 존재`);} });
+function getFirebase(){
+  if(!firebaseSingletonPromise){
+    firebaseSingletonPromise = initFirebase();
+  }
+  return firebaseSingletonPromise;
+}
 
-      const wenchang={甲:'巳',乙:'午',丙:'申',丁:'酉',戊:'申',己:'酉',庚:'亥',辛:'子',壬:'寅',癸:'卯'};
-      if(allBranches.includes(wenchang[dayStem])) push('문창귀인','학문·글·시험·기획·두뇌 활동과 관련된 길신',`${dayStem}일간의 문창귀인 ${wenchang[dayStem]}가 원국에 존재`);
-
-      const yangren={甲:'卯',乙:'寅',丙:'午',丁:'巳',戊:'午',己:'巳',庚:'酉',辛:'申',壬:'子',癸:'亥'};
-      if(allBranches.includes(yangren[dayStem])) push('양인살','강한 추진력·승부욕·독립성이 크게 드러나는 기운',`${dayStem}일간의 양인지 ${yangren[dayStem]}가 원국에 존재`);
-
-      const hongyeom={甲:'午',乙:'申',丙:'寅',丁:'未',戊:'辰',己:'辰',庚:'戌',辛:'酉',壬:'子',癸:'申'};
-      if(allBranches.includes(hongyeom[dayStem])) push('홍염살','이성적 매력·표현력·끌림과 관련해 보는 신살',`${dayStem}일간의 홍염지 ${hongyeom[dayStem]}가 원국에 존재`);
-
-      if(['戊戌','庚辰','庚戌','壬辰'].includes(dayPillar)) push('괴강살','결단력·기개·강한 자기기준과 카리스마로 풀이',`일주가 ${dayPillar}`);
-      if(['甲辰','乙未','丙戌','丁丑','戊辰','壬戌','癸丑'].includes(dayPillar)) push('백호살','강한 에너지와 급격한 사건·수술·혈광의 상징으로 전통적으로 풀이',`일주가 ${dayPillar}`);
-
-      // 월덕귀인: 월지 삼합국에 따라 일간/원국 천간 대조
-      const monthGroup=groupOf(monthBranch);
-      const woldeok={'寅午戌':'丙','申子辰':'壬','亥卯未':'甲','巳酉丑':'庚'}[monthGroup];
-      if(woldeok && allStems.includes(woldeok)) push('월덕귀인','인덕·도움·원만한 해결력과 관련된 길신',`${monthBranch}월 기준 월덕 ${woldeok}가 원국 천간에 존재`);
-
-      // 천덕귀인 통상 월지표
-      const cheondeok={寅:'丁',卯:'申',辰:'壬',巳:'辛',午:'亥',未:'甲',申:'癸',酉:'寅',戌:'丙',亥:'乙',子:'巳',丑:'庚'}[monthBranch];
-      if(cheondeok && (allStems.includes(cheondeok)||allBranches.includes(cheondeok))) push('천덕귀인','난관을 완화하고 주변의 도움을 받는 흐름으로 보는 길신',`${monthBranch}월 기준 천덕 ${cheondeok}가 원국에 존재`);
-
-      const el=document.getElementById('shinsal');
-      if(!found.length){
-        el.innerHTML='<div class="shinsal-empty">현재 적용한 주요 판정표에서는 원국에 뚜렷하게 성립하는 신살·귀인이 확인되지 않았습니다. 이는 나쁜 의미가 아니며, 신살은 사주 전체를 보조적으로 해석하는 요소입니다.</div>';
-      } else {
-        el.innerHTML=found.map(x=>`<div class="shinsal-card"><strong>${x.name}</strong> · ${x.desc}<small>판정 근거: ${x.basis}</small></div>`).join('');
-      }
-    }
-
-    function renderToday(p, counts) {
-      const now = new Date();
-      const today = simpleSaju(new Date(now.getFullYear(), now.getMonth(), now.getDate()), '12:00')[2];
-      const dayStem = p[2].stem;
-      const myEl = elementMap[dayStem];
-      const todayEl = elementMap[today.stem];
-      const todayBranchEl = branchElement[today.branch];
-      const generates = {목:'화',화:'토',토:'금',금:'수',수:'목'};
-      const controls = {목:'토',토:'수',수:'화',화:'금',금:'목'};
-      let score = 72;
-      const tags=[];
-      if(todayEl===myEl){score+=7;tags.push('비슷한 기운이 힘을 보태는 날');}
-      if(generates[todayEl]===myEl){score+=10;tags.push('나를 생해주는 흐름');}
-      if(generates[myEl]===todayEl){score+=4;tags.push('표현·성과가 드러나는 흐름');}
-      if(controls[todayEl]===myEl){score-=8;tags.push('압박과 책임이 늘 수 있는 날');}
-      if(controls[myEl]===todayEl){score+=2;tags.push('재물·현실 이슈가 부각');}
-      if(todayBranchEl===myEl) score+=4;
-      score=Math.max(45,Math.min(95,score));
-
-      const tone = score>=85?'적극적으로 움직이기 좋은 날':score>=75?'무난하게 흐름을 살리기 좋은 날':score>=65?'속도 조절이 중요한 날':'욕심보다 정리가 우선인 날';
-      const strong = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
-      const weak = Object.entries(counts).sort((a,b)=>a[1]-b[1])[0][0];
-      document.getElementById('todayDate').textContent = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} · 오늘 일진 ${today.hanja}`;
-      document.getElementById('todayScore').textContent = score;
-      document.getElementById('todaySummary').innerHTML = `<strong>${tone}</strong><br>오늘은 <b>${todayEl}</b> 기운과 <b>${todayBranchEl}</b> 기운이 들어오는 날로 계산됩니다. 내 일간 ${dayStem}(${myEl})과 비교하면 ${tags[0]||'큰 충돌 없이 자신의 페이스를 유지하기 좋은 흐름'}입니다. 원국에서 강한 ${strong} 기운은 과해지지 않게 조절하고, 부족한 ${weak} 기운의 행동 방식을 의식하면 균형 잡는 데 도움이 됩니다.`;
-      document.getElementById('todayTags').innerHTML = [`오늘 ${today.hanja}`,`행운 보완 오행 ${weak}`,`강점 오행 ${strong}`].map(x=>`<span class="chip" style="background:rgba(255,255,255,.13);color:#fff;border-color:rgba(255,255,255,.25)">${x}</span>`).join('');
-
-      const detailText = {
-        work: score>=75?'미뤘던 일을 시작하거나 결론을 내기 좋습니다. 중요한 일은 오전에 우선순위를 잡아보세요.':'새로운 일을 벌이기보다 기존 업무를 정리하고 실수를 줄이는 쪽이 유리합니다.',
-        money: controls[myEl]===todayEl?'소비·계약·돈의 흐름이 눈에 들어오는 날입니다. 큰 지출은 조건을 한 번 더 확인하세요.':'재물운은 무난한 편입니다. 즉흥적 소비보다 계획한 범위 안에서 움직이는 것이 좋습니다.',
-        relation: todayEl===myEl?'내 의견이 강해질 수 있습니다. 설득보다 상대의 말을 먼저 듣는 편이 좋습니다.':'사람과의 대화에서 작은 도움이나 새로운 정보를 얻기 좋은 흐름입니다.',
-        condition: score<65?'집중력이 떨어질 수 있으니 일정 사이에 쉬는 시간을 두세요.':'컨디션을 밀어붙이기보다 일정한 리듬을 유지하면 안정적으로 움직일 수 있습니다.'
-      };
-      document.getElementById('todayDetails').innerHTML = [
-        ['일·학업',detailText.work],['금전',detailText.money],['관계',detailText.relation],['컨디션',detailText.condition]
-      ].map(([a,b])=>`<div class="today-item"><b>${a}</b><p>${b}</p></div>`).join('');
-    }
-
-    function renderLuck(p, birthYear) {
-      const seed = hashSeed(p.map(x=>x.hanja).join(''));
-      const tones = ['확장과 도전','정리와 안정','관계와 협업','재정비와 학습','성과와 책임'];
-      document.getElementById('decadeLuck').innerHTML = Array.from({length:8},(_,i)=>{
-        const age = 5 + i*10;
-        const cyc = cyclical((birthYear - 4) + i + 1);
-        return `<div class="fortune-row"><b>${age}~${age+9}세</b><span>${cyc.hanja} 대운 · ${tones[(seed+i)%tones.length]}</span><span>${((seed+i)%5)+1}/5</span></div>`;
-      }).join('');
-      const thisYear = new Date().getFullYear();
-      document.getElementById('yearLuck').innerHTML = Array.from({length:6},(_,i)=>{
-        const year=thisYear+i, cyc=cyclical(year-4);
-        return `<div class="fortune-row"><b>${year}</b><span>${cyc.hanja} 세운 · ${tones[(seed+year)%tones.length]}</span><span>${((seed+year)%5)+1}/5</span></div>`;
-      }).join('');
-    }
-
-    function renderReadings(dayEl, counts) {
-      const text = {
-        목:['성장 지향적이고 새 일을 시작하는 힘이 강한 편입니다.','기획·교육·콘텐츠·성장형 업무와 잘 맞을 수 있습니다.','확장에 힘을 쓰므로 지출 속도 관리가 중요합니다.','관계에서 표현과 배려의 균형이 중요합니다.','과로보다 규칙적인 생활 리듬을 우선하세요.'],
-        화:['표현력과 추진력이 빠르게 드러나는 편입니다.','사람 앞에 서거나 결과를 빠르게 내는 일이 어울립니다.','기회 포착이 빠른 대신 충동 지출을 조심하세요.','감정 표현이 분명해 관계가 빠르게 진전될 수 있습니다.','휴식 없이 달리는 패턴을 줄이는 것이 좋습니다.'],
-        토:['안정감과 책임감이 강점으로 나타납니다.','관리·운영·조정·지원 역할과 궁합이 좋습니다.','꾸준한 축적형 재물 관리가 잘 맞는 편입니다.','신뢰를 중시해 천천히 깊어지는 관계를 선호합니다.','생활 패턴의 규칙성을 유지하는 것이 핵심입니다.'],
-        금:['기준과 판단이 분명하고 정리 능력이 좋습니다.','분석·법무·품질·기술·재무처럼 기준이 중요한 일과 맞습니다.','손익 판단이 빠르지만 지나친 보수성은 경계하세요.','상대에게 높은 기준을 요구하지 않도록 조절해보세요.','긴장과 경직을 풀어주는 휴식이 도움이 됩니다.'],
-        수:['관찰력과 사고의 깊이가 강점입니다.','연구·전략·데이터·상담·기획 업무와 잘 맞을 수 있습니다.','정보를 충분히 본 뒤 움직이는 안정형 경향이 있습니다.','감정을 속에 쌓기보다 말로 정리하는 것이 좋습니다.','수면과 회복 시간을 일정하게 확보하세요.']
-      }[dayEl];
-      const labels=['성격','직업','재물','연애','건강'];
-      document.getElementById('readings').innerHTML = labels.map((x,i)=>`<div class="reading-card"><b>${x}</b><p>${text[i]}</p></div>`).join('');
-    }
-
-    // 숫자만 입력하면 생년월일을 YYYY-MM-DD 형태로 자동 정리합니다.
-    function formatBirthInput(value) {
-      const digits = value.replace(/\D/g, '').slice(0, 8);
-      const y = digits.slice(0, 4);
-      const m = digits.slice(4, 6);
-      const d = digits.slice(6, 8);
-      return [y, m, d].filter(Boolean).join('-');
-    }
-
-    const birthInput = document.getElementById('birth');
-    const birthHourInput = document.getElementById('birthHour');
-    const birthMinuteInput = document.getElementById('birthMinute');
-
-    birthMinuteInput.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 2);
-      if (e.target.value !== '' && Number(e.target.value) > 59) e.target.value = '59';
-    });
-
-    birthInput.addEventListener('input', (e) => {
-      e.target.value = formatBirthInput(e.target.value);
-    });
-
-    function getBirthTime() {
-      const hour12 = parseInt(birthHourInput.value, 10);
-      if (!hour12) return '';
-      const ampm = document.querySelector('input[name="ampm"]:checked').value;
-      let hour24 = hour12 % 12;
-      if (ampm === 'PM') hour24 += 12;
-      const minute = birthMinuteInput.value === '' ? 0 : Number(birthMinuteInput.value);
-      return String(hour24).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
-    }
-
-    function getBirthTimeLabel() {
-      const hour = birthHourInput.value;
-      if (!hour) return '';
-      const ampm = document.querySelector('input[name="ampm"]:checked').value;
-      const minute = birthMinuteInput.value === '' ? '' : ` ${String(Number(birthMinuteInput.value)).padStart(2, '0')}분`;
-      return `${ampm === 'AM' ? '오전' : '오후'} ${hour}시${minute}`;
-    }
-
-    document.getElementById('sajuForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = document.getElementById('name').value.trim();
-      const birth = document.getElementById('birth').value;
-      const time = getBirthTime();
-      const timeLabel = getBirthTimeLabel();
-      const calendar = document.querySelector('input[name="calendar"]:checked').value;
-      const gender = document.getElementById('gender').value;
-      if (!name || !birth) return;
-
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(birth)) {
-        alert('생년월일은 YYYY-MM-DD 형식으로 입력해주세요. 예: 1995-08-21');
-        birthInput.focus();
-        return;
-      }
-
-      const [y,m,d] = birth.split('-').map(Number);
-      const checkDate = new Date(y, m - 1, d);
-      if (checkDate.getFullYear() !== y || checkDate.getMonth() !== m - 1 || checkDate.getDate() !== d) {
-        alert('올바른 생년월일을 입력해주세요.');
-        birthInput.focus();
-        return;
-      }
-
-      const p = simpleSaju(checkDate, time);
-      const labels = ['년주','월주','일주','시주'];
-      document.getElementById('resultName').textContent = name;
-      document.getElementById('resultMeta').textContent = `${calendar==='solar'?'양력':'음력'} ${birth}${timeLabel?' · '+timeLabel:''} · ${gender==='female'?'여성':gender==='male'?'남성':'성별 미선택'}`;
-      document.getElementById('pillars').innerHTML = p.map((x,i)=>`<div class="pillar"><b>${labels[i]}</b><div class="hanja">${x.hanja}</div><div class="hangul">천간 ${x.stem} · 지지 ${x.branch}<br>${x.kor}</div></div>`).join('');
-
-      const counts = renderElements(p);
-      renderToday(p, counts);
-      const dayStem = p[2].stem, dayEl = elementMap[dayStem];
-      document.getElementById('dayMaster').innerHTML = `<strong>${dayStem}(${stemKor[stems.indexOf(dayStem)]}) · ${dayEl}</strong><br>${dayMasterText[dayStem]}입니다.`;
-      renderTenGods(p);
-
-      const supportive = counts[dayEl] + ({목:counts.수, 화:counts.목, 토:counts.화, 금:counts.토, 수:counts.금}[dayEl]||0);
-      const strength = supportive >= 4 ? '신강' : supportive <= 2 ? '신약' : '중화';
-      document.getElementById('strength').innerHTML = `<strong>${strength}</strong>으로 보는 데모 결과입니다. 같은 오행과 나를 생하는 오행의 비중을 단순 합산해 판단했습니다.`;
-      const minEls = Object.entries(counts).sort((a,b)=>a[1]-b[1]).slice(0,2).map(x=>x[0]);
-      document.getElementById('usefulGod').innerHTML = `<strong>용신 후보: ${minEls[0]} · 희신 후보: ${minEls[1]}</strong><br>현재는 오행의 부족분을 보완하는 단순 방식으로 표시합니다.`;
-
-      renderRelations(p);
-      renderShinsal(p);
-      renderLuck(p,y);
-      renderReadings(dayEl,counts);
-
-      const result = document.getElementById('result');
-      result.style.display='block';
-      result.scrollIntoView({behavior:'smooth',block:'start'});
-    });
-  </script>
-
-  <script type="module">
-    // Firebase 동기화: 실패해도 위쪽 로컬/기본값 로직이 이미 동작 중이므로 화면은 정상적으로 표시됩니다.
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+async function initFirebase(){
+  try{
+    const [{ initializeApp }, { getAuth, signInAnonymously }, { getFirestore, doc, getDoc, setDoc }, { getStorage, ref, uploadBytes, getDownloadURL }] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js")
+    ]);
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZzeuVZ705Y9U3AABIZX9Ej60VTRotgjw",
@@ -682,25 +198,53 @@
       measurementId: "G-VT3TRQSR5V"
     };
 
-    (async () => {
-      try {
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const snap = await getDoc(doc(db, 'siteContent', 'main'));
-        if (snap.exists()) {
-          const remote = snap.data();
-          const { backgroundImageUrl, ...remoteText } = remote;
-          let local = {}; try { local = JSON.parse(localStorage.getItem('sajuAdminTexts') || '{}'); } catch (e) {}
-          const merged = { ...local, ...remoteText };
-          try { localStorage.setItem('sajuAdminTexts', JSON.stringify(merged)); } catch (e) {}
-          if (backgroundImageUrl) { try { localStorage.setItem('sajuBackgroundImageUrl', backgroundImageUrl); } catch (e) {} }
-          window.__sajuApplyAdminTexts && window.__sajuApplyAdminTexts();
-          window.__sajuApplyBackgroundImage && window.__sajuApplyBackgroundImage();
-        }
-      } catch (e) {
-        console.warn('Firebase 콘텐츠를 불러오지 못했습니다. 로컬/기본값으로 표시합니다.', e);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const CONTENT_DOC = doc(db, 'siteContent', 'main');
+
+    let authPromise = null;
+    function ensureAuth(){
+      if(!authPromise){
+        authPromise = signInAnonymously(auth).catch(err=>{ authPromise=null; throw err; });
       }
-    })();
-  </script>
+      return authPromise;
+    }
+
+    firebaseSingleton = { auth, ensureAuth, db, doc, getDoc, setDoc, CONTENT_DOC, storage, ref, uploadBytes, getDownloadURL };
+    return firebaseSingleton;
+  }catch(e){
+    console.warn('Firebase 모듈을 불러오지 못했습니다. 로컬 저장만 사용합니다.', e);
+    return null;
+  }
+}
+
+async function trySyncFromFirebase(local){
+  const msgEl=document.getElementById('saveMsg');
+  msgEl.textContent='Firebase에서 최신 내용을 불러오는 중...';
+  try{
+    const fb = await getFirebase();
+    if(!fb){ setBadge('off'); msgEl.textContent='Firebase에 연결하지 못해 이 브라우저에 저장된 내용만 표시합니다.'; return; }
+    const snap = await fb.getDoc(fb.CONTENT_DOC);
+    setBadge('ok');
+    if(snap.exists()){
+      const remote = snap.data();
+      const { backgroundImageUrl, ...remoteText } = remote;
+      const combined = { ...local, ...remoteText };
+      try{ localStorage.setItem('sajuAdminTexts', JSON.stringify(combined)); }catch(e){}
+      if(backgroundImageUrl){ try{ localStorage.setItem('sajuBackgroundImageUrl', backgroundImageUrl); }catch(e){} }
+      render(combined, backgroundImageUrl);
+      msgEl.textContent='Firebase에 저장된 최신 내용을 불러왔습니다.';
+    } else {
+      msgEl.textContent='';
+    }
+  }catch(e){
+    console.warn('Firebase 콘텐츠 조회 실패, 로컬 값을 사용합니다.', e);
+    setBadge('off');
+    msgEl.textContent='Firebase에 연결하지 못해 이 브라우저에 저장된 내용만 표시합니다.';
+  }
+}
+</script>
 </body>
 </html>
