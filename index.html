@@ -30,6 +30,9 @@
       background: linear-gradient(to bottom, rgba(255,255,255,.05), rgba(255,249,235,.16));
     }
     .wrap { max-width: 1120px; margin: 0 auto; }
+    .admin-footer { margin-top:28px; text-align:center; }
+    .admin-mode-btn { display:inline-block; padding:10px 16px; border:1px solid rgba(23,63,66,.28); border-radius:999px; background:rgba(255,250,238,.78); color:var(--ink); text-decoration:none; font-size:12px; font-weight:700; letter-spacing:.04em; box-shadow:0 6px 18px rgba(23,63,66,.10); transition:transform .15s ease, background .15s ease; }
+    .admin-mode-btn:hover { transform:translateY(-1px); background:rgba(255,255,255,.95); }
     .hero {
       text-align: center;
       margin-bottom: 28px;
@@ -190,39 +193,39 @@
     <div class="wrap">
       <header class="hero">
         <div class="seal">命</div>
-        <h1>연화당 사주</h1>
-        <div class="subtitle">생년월일로 만나는 나의 사주 이야기</div>
+        <h1 data-text-key="siteTitle">연화당 사주</h1>
+        <div class="subtitle" data-text-key="siteSubtitle">생년월일로 만나는 나의 사주 이야기</div>
       </header>
 
       <section class="card">
         <div class="card-head">
-          <h2>사주 정보 입력</h2>
-          <p>정확한 사주팔자를 보려면 출생시간까지 입력하는 것을 권장합니다.</p>
+          <h2 data-text-key="inputTitle">사주 정보 입력</h2>
+          <p data-text-key="inputDescription">정확한 사주팔자를 보려면 출생시간까지 입력하는 것을 권장합니다.</p>
         </div>
         <form id="sajuForm">
           <div class="grid">
             <div class="field full">
-              <label>달력 구분</label>
+              <label data-text-key="calendarLabel">달력 구분</label>
               <div class="calendar-choice">
-                <label class="radio"><input type="radio" name="calendar" value="solar" checked><span>양력</span></label>
-                <label class="radio"><input type="radio" name="calendar" value="lunar"><span>음력</span></label>
+                <label class="radio"><input type="radio" name="calendar" value="solar" checked><span data-text-key="solarLabel">양력</span></label>
+                <label class="radio"><input type="radio" name="calendar" value="lunar"><span data-text-key="lunarLabel">음력</span></label>
               </div>
             </div>
 
             <div class="field">
-              <label for="name">이름</label>
+              <label for="name" data-text-key="nameLabel">이름</label>
               <input id="name" type="text" placeholder="예: 홍길동" required />
             </div>
             <div class="field">
-              <label for="birth">생년월일</label>
+              <label for="birth" data-text-key="birthLabel">생년월일</label>
               <input id="birth" type="text" inputmode="numeric" maxlength="10" placeholder="YYYY-MM-DD" autocomplete="bday" required />
             </div>
             <div class="field">
-              <label for="birthHour">출생시간</label>
+              <label for="birthHour" data-text-key="timeLabel">출생시간</label>
               <div class="time-row">
                 <div class="ampm-choice">
-                  <label class="radio"><input type="radio" name="ampm" value="AM" checked><span>오전</span></label>
-                  <label class="radio"><input type="radio" name="ampm" value="PM"><span>오후</span></label>
+                  <label class="radio"><input type="radio" name="ampm" value="AM" checked><span data-text-key="amLabel">오전</span></label>
+                  <label class="radio"><input type="radio" name="ampm" value="PM"><span data-text-key="pmLabel">오후</span></label>
                 </div>
                 <select id="birthHour" class="time-hour" aria-label="출생 시각">
                   <option value="">시간 모름</option>
@@ -233,10 +236,10 @@
                 </select>
                 <input id="birthMinute" class="time-minute" type="text" inputmode="numeric" maxlength="2" placeholder="분" aria-label="출생 분" />
               </div>
-              <div class="hint">오전/오후와 1시~12시를 선택하고, 분은 숫자 최대 2자리(00~59)까지 입력하세요. 모르면 '시간 모름'을 선택할 수 있습니다.</div>
+              <div class="hint" data-text-key="timeHint">오전/오후와 1시~12시를 선택하고, 분은 숫자 최대 2자리(00~59)까지 입력하세요. 모르면 '시간 모름'을 선택할 수 있습니다.</div>
             </div>
             <div class="field">
-              <label for="gender">성별</label>
+              <label for="gender" data-text-key="genderLabel">성별</label>
               <select id="gender">
                 <option value="female">여성</option>
                 <option value="male">남성</option>
@@ -244,7 +247,7 @@
               </select>
             </div>
           </div>
-          <button type="submit">내 사주 보기</button>
+          <button type="submit" data-text-key="submitButton">내 사주 보기</button>
         </form>
       </section>
 
@@ -259,7 +262,7 @@
 
           <div class="section-stack">
             <div class="box wide today-card">
-              <div class="section-title"><h3>오늘의 사주</h3><small id="todayDate"></small></div>
+              <div class="section-title"><h3 data-text-key="todayTitle">오늘의 사주</h3><small id="todayDate"></small></div>
               <div class="today-head">
                 <div class="today-score"><div><strong id="todayScore">-</strong><span>오늘의 흐름</span></div></div>
                 <div>
@@ -271,65 +274,88 @@
             </div>
             <div class="section-grid">
               <div class="box">
-                <div class="section-title"><h3>오행 분포</h3><small>목·화·토·금·수</small></div>
+                <div class="section-title"><h3 data-text-key="elementsTitle">오행 분포</h3><small data-text-key="elementsSubtitle">목·화·토·금·수</small></div>
                 <div id="elementBars"></div>
                 <div class="element-detail-grid" id="elementDetails"></div>
                 <div class="element-summary" id="elementSummary"></div>
               </div>
               <div class="box">
-                <div class="section-title"><h3>일간</h3><small>나를 나타내는 기운</small></div>
+                <div class="section-title"><h3 data-text-key="dayMasterTitle">일간</h3><small data-text-key="dayMasterSubtitle">나를 나타내는 기운</small></div>
                 <p id="dayMaster"></p>
               </div>
 
               <div class="box">
-                <div class="section-title"><h3>십성</h3><small>10가지 관계 기운</small></div>
+                <div class="section-title"><h3 data-text-key="tenGodsTitle">십성</h3><small data-text-key="tenGodsSubtitle">10가지 관계 기운</small></div>
                 <div class="chips" id="tenGods"></div>
               </div>
               <div class="box">
-                <div class="section-title"><h3>신강 / 신약</h3><small>일간의 강약</small></div>
+                <div class="section-title"><h3 data-text-key="strengthTitle">신강 / 신약</h3><small data-text-key="strengthSubtitle">일간의 강약</small></div>
                 <p id="strength"></p>
               </div>
 
               <div class="box">
-                <div class="section-title"><h3>용신 / 희신</h3><small>보완하면 좋은 기운</small></div>
+                <div class="section-title"><h3 data-text-key="usefulGodTitle">용신 / 희신</h3><small data-text-key="usefulGodSubtitle">보완하면 좋은 기운</small></div>
                 <p id="usefulGod"></p>
               </div>
               <div class="box">
-                <div class="section-title"><h3>합·충·형·파·해</h3><small>지지 관계</small></div>
+                <div class="section-title"><h3 data-text-key="relationsTitle">합·충·형·파·해</h3><small data-text-key="relationsSubtitle">지지 관계</small></div>
                 <div class="chips" id="relations"></div>
               </div>
 
               <div class="box wide">
-                <div class="section-title"><h3>나에게 해당하는 신살·귀인</h3><small>원국에서 성립하는 항목만 표시</small></div>
+                <div class="section-title"><h3 data-text-key="shinsalTitle">나에게 해당하는 신살·귀인</h3><small data-text-key="shinsalSubtitle">원국에서 성립하는 항목만 표시</small></div>
                 <div id="shinsal"></div>
               </div>
 
               <div class="box wide">
-                <div class="section-title"><h3>대운</h3><small>10년 단위 흐름</small></div>
+                <div class="section-title"><h3 data-text-key="decadeTitle">대운</h3><small data-text-key="decadeSubtitle">10년 단위 흐름</small></div>
                 <div class="fortune-list" id="decadeLuck"></div>
               </div>
 
               <div class="box wide">
-                <div class="section-title"><h3>세운</h3><small>연도별 흐름</small></div>
+                <div class="section-title"><h3 data-text-key="yearLuckTitle">세운</h3><small data-text-key="yearLuckSubtitle">연도별 흐름</small></div>
                 <div class="fortune-list" id="yearLuck"></div>
               </div>
 
               <div class="box wide">
-                <div class="section-title"><h3>종합 풀이</h3><small>성격·직업·재물·연애·건강</small></div>
+                <div class="section-title"><h3 data-text-key="readingTitle">종합 풀이</h3><small data-text-key="readingSubtitle">성격·직업·재물·연애·건강</small></div>
                 <div class="reading-grid" id="readings"></div>
               </div>
             </div>
           </div>
 
-          <div class="disclaimer">
+          <div class="disclaimer" data-text-key="disclaimer">
             현재 버전은 사이트 UI와 결과 구조를 확인하기 위한 데모입니다. 오늘의 운세와 신살·귀인은 입력한 원국을 기준으로 규칙표를 적용해 표시하지만, 음력·윤달 변환, 절기 기준 월주, 정확한 일주·시주, 지장간·대운 시작 시점 등은 전문 만세력 로직 또는 검증된 API를 연결해야 실제 서비스 수준의 정확도를 확보할 수 있습니다. 신살 판정법은 학파에 따라 일부 차이가 있습니다.
           </div>
         </div>
       </section>
+      <div class="admin-footer">
+        <a class="admin-mode-btn" href="admin.html">관리자 모드</a>
+      </div>
     </div>
   </div>
 
   <script>
+    const ADMIN_TEXT_DEFAULTS = {
+      siteTitle:'연화당 사주', siteSubtitle:'생년월일로 만나는 나의 사주 이야기', inputTitle:'사주 정보 입력',
+      inputDescription:'정확한 사주팔자를 보려면 출생시간까지 입력하는 것을 권장합니다.', calendarLabel:'달력 구분', solarLabel:'양력', lunarLabel:'음력',
+      nameLabel:'이름', birthLabel:'생년월일', timeLabel:'출생시간', amLabel:'오전', pmLabel:'오후',
+      timeHint:"오전/오후와 1시~12시를 선택하고, 분은 숫자 최대 2자리(00~59)까지 입력하세요. 모르면 '시간 모름'을 선택할 수 있습니다.",
+      genderLabel:'성별', submitButton:'내 사주 보기', todayTitle:'오늘의 사주', elementsTitle:'오행 분포', elementsSubtitle:'목·화·토·금·수',
+      dayMasterTitle:'일간', dayMasterSubtitle:'나를 나타내는 기운', tenGodsTitle:'십성', tenGodsSubtitle:'10가지 관계 기운',
+      strengthTitle:'신강 / 신약', strengthSubtitle:'일간의 강약', usefulGodTitle:'용신 / 희신', usefulGodSubtitle:'보완하면 좋은 기운',
+      relationsTitle:'합·충·형·파·해', relationsSubtitle:'지지 관계', shinsalTitle:'나에게 해당하는 신살·귀인', shinsalSubtitle:'원국에서 성립하는 항목만 표시',
+      decadeTitle:'대운', decadeSubtitle:'10년 단위 흐름', yearLuckTitle:'세운', yearLuckSubtitle:'연도별 흐름', readingTitle:'종합 풀이', readingSubtitle:'성격·직업·재물·연애·건강',
+      disclaimer:'현재 버전은 사이트 UI와 결과 구조를 확인하기 위한 데모입니다. 오늘의 운세와 신살·귀인은 입력한 원국을 기준으로 규칙표를 적용해 표시하지만, 음력·윤달 변환, 절기 기준 월주, 정확한 일주·시주, 지장간·대운 시작 시점 등은 전문 만세력 로직 또는 검증된 API를 연결해야 실제 서비스 수준의 정확도를 확보할 수 있습니다. 신살 판정법은 학파에 따라 일부 차이가 있습니다.'
+    };
+    function applyAdminTexts(){
+      let saved={}; try{ saved=JSON.parse(localStorage.getItem('sajuAdminTexts')||'{}'); }catch(e){}
+      const texts={...ADMIN_TEXT_DEFAULTS,...saved};
+      document.querySelectorAll('[data-text-key]').forEach(el=>{ const key=el.dataset.textKey; if(texts[key] != null) el.textContent=texts[key]; });
+      document.title = (texts.siteTitle || '연화당 사주');
+    }
+    applyAdminTexts();
+
     const stems = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
     const branches = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
     const stemKor = ['갑','을','병','정','무','기','경','신','임','계'];
