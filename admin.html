@@ -3,6 +3,9 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>연화당 사주 관리자</title>
 <style>
 *{box-sizing:border-box} body{margin:0;background:#f4efe4;color:#173f42;font-family:Arial,"Noto Sans KR",sans-serif}.wrap{max-width:900px;margin:40px auto;padding:0 18px}.card{background:#fffaf0;border:1px solid rgba(23,63,66,.18);border-radius:18px;padding:24px;box-shadow:0 12px 35px rgba(0,0,0,.08)}h1{margin-top:0}.login{max-width:420px;margin:100px auto}.row{display:grid;grid-template-columns:190px 1fr;gap:12px;align-items:start;padding:10px 0;border-bottom:1px dashed #d8d0c4}.row:last-child{border-bottom:0}label{font-weight:700;font-size:13px;padding-top:11px}input,textarea{width:100%;border:1px solid #c7bfb3;border-radius:10px;padding:11px 12px;font-size:14px;background:white;color:#173f42}textarea{min-height:84px;resize:vertical}button,.linkbtn{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;background:#173f42;color:#fff;text-decoration:none;display:inline-block}.secondary{background:#8b7b68}.danger{background:#a84d43}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.msg{margin-top:12px;font-size:13px}.hidden{display:none}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px}.note{font-size:12px;line-height:1.6;opacity:.7}.imgpreview{max-width:100%;max-height:220px;border-radius:10px;margin-bottom:10px;border:1px solid #d8d0c4;display:block}.badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;margin-left:8px}.badge.ok{background:#e4f3ea;color:#1f7a4d}.badge.off{background:#f3e4e4;color:#8a2f2f}@media(max-width:650px){.row{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
@@ -37,9 +40,48 @@
     <div id="saveMsg" class="msg"></div>
     <p class="note">※ 비밀번호 1234는 HTML/자바스크립트에 포함된 클라이언트 측 비밀번호라 실제 운영용 보안에는 적합하지 않습니다. 외부에 공개하는 사이트라면 서버 로그인/인증을 붙이는 것을 권장합니다.</p>
     <p class="note">※ Firebase 동기화는 익명 로그인을 이용합니다. Firebase 콘솔에서 Authentication → 익명 로그인 사용 설정과, Firestore/Storage 보안 규칙(쓰기는 로그인된 사용자만 허용)을 설정해야 저장이 정상 동작합니다.</p>
+    <p class="note">페이지 버전: 2026-09-12-4 (카카오톡 등에서 예전 화면이 뜨면, 링크 끝에 <code>?v=날짜</code>를 붙여서 새로 공유하거나 "다른 브라우저에서 열기"로 새로고침하세요.)</p>
   </section>
 </div>
 <script>
+/* ===================== 화면에 직접 에러를 표시 (모바일은 콘솔을 보기 어려우므로) ===================== */
+function showOnScreenError(prefix, err){
+  try{
+    const text = prefix + ': ' + (err && (err.message || err.code || err)) ;
+    let box = document.getElementById('onScreenError');
+    if(!box){
+      box = document.createElement('div');
+      box.id = 'onScreenError';
+      box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;background:#a84d43;color:#fff;font-size:12px;line-height:1.6;padding:10px 14px;z-index:9999;white-space:pre-wrap;max-height:40vh;overflow:auto;';
+      document.body.appendChild(box);
+    }
+    box.textContent = text;
+  }catch(e){}
+}
+window.addEventListener('error', (e)=>{ showOnScreenError('스크립트 오류', e.error || e.message); });
+window.addEventListener('unhandledrejection', (e)=>{ showOnScreenError('비동기 오류', e.reason); });
+
+let toastTimer=null;
+function showToast(text, ok){
+  try{
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    let t=document.getElementById('onScreenToast');
+    if(!t){
+      t=document.createElement('div');
+      t.id='onScreenToast';
+      t.style.cssText='position:fixed;left:10px;right:10px;top:10px;z-index:10000;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.6;box-shadow:0 8px 24px rgba(0,0,0,.25);';
+      document.body.appendChild(t);
+    }
+    t.style.background = ok ? '#173f42' : '#a84d43';
+    t.style.color = '#fff';
+    t.textContent = text;
+    t.style.display='block';
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>{ t.style.display='none'; }, 6000);
+    window.scrollTo(0,0);
+  }catch(e){}
+}
+
 /* ===================== 핵심 UI 로직 (Firebase 없이도 항상 동작) ===================== */
 const PASSWORD='1234';
 const defaults={
@@ -49,12 +91,21 @@ const labels={siteTitle:'사이트 제목',siteSubtitle:'메인 부제',inputTit
 
 function getSaved(){try{return JSON.parse(localStorage.getItem('sajuAdminTexts')||'{}')}catch(e){return {}}}
 function getSavedImage(){try{return localStorage.getItem('sajuBackgroundImageUrl')||''}catch(e){return ''}}
-function setBadge(state){
+function setBadge(state, detail){
   const b=document.getElementById('fbBadge');
   if(!b) return;
-  if(state==='ok'){ b.textContent='Firebase 연결됨'; b.className='badge ok'; }
-  else if(state==='off'){ b.textContent='Firebase 연결 안됨(로컬만 사용)'; b.className='badge off'; }
-  else { b.textContent='Firebase 확인 중'; b.className='badge off'; }
+  if(state==='ok'){ b.textContent='Firebase 연결됨'; b.className='badge ok'; b.title=''; }
+  else if(state==='off'){ b.textContent='Firebase 연결 안됨(로컬만 사용)'; b.className='badge off'; b.title = detail ? ('사유: '+detail+' (마우스를 올리면 보입니다)') : '사유 불명'; }
+  else { b.textContent='Firebase 확인 중'; b.className='badge off'; b.title=''; }
+}
+function describeFirebaseError(e){
+  const code = (e && (e.code || e.message)) ? String(e.code || e.message) : String(e);
+  if(/permission-denied/i.test(code)) return 'Firestore 보안 규칙에서 읽기/쓰기가 막혀 있습니다 (Firestore 규칙을 확인하세요).';
+  if(/not-found|NOT_FOUND/i.test(code)) return 'Firestore 데이터베이스가 아직 생성되지 않았습니다 (Firebase 콘솔 → Firestore Database → 데이터베이스 만들기).';
+  if(/auth\/admin-restricted-operation|operation-not-allowed/i.test(code)) return '익명 로그인이 꺼져 있습니다 (Firebase 콘솔 → Authentication → Sign-in method → 익명 사용 설정).';
+  if(/Failed to fetch|NetworkError|TypeError: Failed/i.test(code)) return 'Firebase 스크립트/서버에 접속하지 못했습니다 (인터넷 연결 또는 file://로 열었는지 확인).';
+  if(/firebase-unavailable/i.test(code)) return 'Firebase 모듈을 불러오지 못했습니다 (네트워크 또는 file:// 환경 문제일 수 있습니다).';
+  return code;
 }
 
 function render(vals, imageUrl){
@@ -93,6 +144,7 @@ document.getElementById('saveBtn').onclick=async ()=>{
   try{ localStorage.setItem('sajuAdminTexts', JSON.stringify(data)); }catch(e){}
   const msgEl=document.getElementById('saveMsg');
   msgEl.textContent='저장했습니다.';
+  showToast('저장 처리 중...', true);
   try{
     const fb = await getFirebase();
     if(!fb) throw new Error('firebase-unavailable');
@@ -100,10 +152,13 @@ document.getElementById('saveBtn').onclick=async ()=>{
     await fb.setDoc(fb.CONTENT_DOC, data, {merge:true});
     setBadge('ok');
     msgEl.textContent='저장했습니다. Firebase에도 동기화되어 다른 기기의 홈페이지에도 반영됩니다.';
+    showToast('저장 완료! Firebase에도 동기화되었습니다.', true);
   }catch(e){
     console.warn(e);
-    setBadge('off');
-    msgEl.textContent='이 브라우저에는 저장했습니다. Firebase 동기화는 실패했습니다(인터넷 연결 또는 Firebase 설정을 확인해주세요). 이 화면과 이 브라우저에서는 정상적으로 반영됩니다.';
+    const reason=describeFirebaseError(e);
+    setBadge('off', reason);
+    msgEl.textContent='이 브라우저에는 저장했습니다. Firebase 동기화는 실패했습니다: '+reason;
+    showToast('이 브라우저에는 저장됨. Firebase 동기화 실패: '+reason, false);
   }
 };
 
@@ -113,6 +168,7 @@ document.getElementById('resetBtn').onclick=async ()=>{
   render(defaults, getSavedImage());
   const msgEl=document.getElementById('saveMsg');
   msgEl.textContent='기본값으로 초기화했습니다.';
+  showToast('초기화 처리 중...', true);
   try{
     const fb = await getFirebase();
     if(!fb) throw new Error('firebase-unavailable');
@@ -120,10 +176,13 @@ document.getElementById('resetBtn').onclick=async ()=>{
     await fb.setDoc(fb.CONTENT_DOC, defaults, {merge:true});
     setBadge('ok');
     msgEl.textContent+=' (Firebase에도 기본값으로 반영했습니다.)';
+    showToast('초기화 완료! Firebase에도 반영되었습니다.', true);
   }catch(e){
     console.warn(e);
-    setBadge('off');
-    msgEl.textContent+=' Firebase 동기화는 실패했습니다(로컬 초기화는 완료).';
+    const reason=describeFirebaseError(e);
+    setBadge('off', reason);
+    msgEl.textContent+=' Firebase 동기화는 실패했습니다: '+reason;
+    showToast('로컬은 초기화됨. Firebase 동기화 실패: '+reason, false);
   }
 };
 
@@ -141,10 +200,11 @@ document.getElementById('bgUploadBtn').onclick=async ()=>{
   const fileInput=document.getElementById('bgFile');
   const file=fileInput.files[0];
   const msgEl=document.getElementById('bgMsg');
-  if(!file){ msgEl.textContent='업로드할 이미지를 선택해주세요.'; return; }
-  if(!file.type.startsWith('image/')){ msgEl.textContent='이미지 파일만 업로드할 수 있습니다.'; return; }
-  if(file.size > 5*1024*1024){ msgEl.textContent='이미지 용량은 5MB 이하로 올려주세요.'; return; }
+  if(!file){ msgEl.textContent='업로드할 이미지를 선택해주세요.'; showToast('업로드할 이미지를 선택해주세요.', false); return; }
+  if(!file.type.startsWith('image/')){ msgEl.textContent='이미지 파일만 업로드할 수 있습니다.'; showToast('이미지 파일만 업로드할 수 있습니다.', false); return; }
+  if(file.size > 5*1024*1024){ msgEl.textContent='이미지 용량은 5MB 이하로 올려주세요.'; showToast('이미지 용량은 5MB 이하로 올려주세요.', false); return; }
   msgEl.textContent='업로드 중...';
+  showToast('이미지 업로드 중...', true);
   try{
     const fb = await getFirebase();
     if(!fb) throw new Error('firebase-unavailable');
@@ -159,10 +219,13 @@ document.getElementById('bgUploadBtn').onclick=async ()=>{
     document.getElementById('bgPreview').classList.remove('hidden');
     setBadge('ok');
     msgEl.textContent='배경 이미지를 저장했습니다. 홈페이지를 새로고침하면 반영됩니다.';
+    showToast('이미지 저장 완료!', true);
   }catch(e){
     console.warn(e);
-    setBadge('off');
-    msgEl.textContent='업로드에 실패했습니다. Firebase Storage를 사용하려면 인터넷 연결이 필요하고, 이 페이지를 http(s) 서버로 열어야 합니다(파일 더블클릭으로 열면 동작하지 않을 수 있습니다).';
+    const reason=describeFirebaseError(e);
+    setBadge('off', reason);
+    msgEl.textContent='업로드에 실패했습니다: '+reason;
+    showToast('업로드 실패: '+reason, false);
   }
 };
 
@@ -216,16 +279,23 @@ async function initFirebase(){
     return firebaseSingleton;
   }catch(e){
     console.warn('Firebase 모듈을 불러오지 못했습니다. 로컬 저장만 사용합니다.', e);
+    lastFirebaseInitError = e;
     return null;
   }
 }
+let lastFirebaseInitError = null;
 
 async function trySyncFromFirebase(local){
   const msgEl=document.getElementById('saveMsg');
   msgEl.textContent='Firebase에서 최신 내용을 불러오는 중...';
   try{
     const fb = await getFirebase();
-    if(!fb){ setBadge('off'); msgEl.textContent='Firebase에 연결하지 못해 이 브라우저에 저장된 내용만 표시합니다.'; return; }
+    if(!fb){
+      const reason = describeFirebaseError(lastFirebaseInitError || 'firebase-unavailable');
+      setBadge('off', reason);
+      msgEl.textContent='Firebase에 연결하지 못했습니다: '+reason+' (이 브라우저에 저장된 내용만 표시합니다.)';
+      return;
+    }
     const snap = await fb.getDoc(fb.CONTENT_DOC);
     setBadge('ok');
     if(snap.exists()){
